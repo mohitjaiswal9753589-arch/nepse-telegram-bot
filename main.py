@@ -1,5 +1,6 @@
 import os
 import asyncio
+import inspect
 from telegram import Bot
 from nepse_data_api import Nepse
 
@@ -10,24 +11,19 @@ async def main():
     try:
         nepse = Nepse()
 
-        data = nepse.get_historical_chart("NABIL")
+        message = inspect.getdoc(nepse.get_historical_chart)
 
-        message = (
-            "📈 Historical Chart Test\n\n"
-            + str(data)[:3500]
-        )
+        if not message:
+            message = str(inspect.signature(nepse.get_historical_chart))
 
     except Exception as e:
-        message = (
-            "❌ Error\n\n"
-            + str(e)
-        )
+        message = str(e)
 
     bot = Bot(token=BOT_TOKEN)
 
     await bot.send_message(
         chat_id=CHAT_ID,
-        text=message
+        text=message[:4000]
     )
 
 if __name__ == "__main__":
