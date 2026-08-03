@@ -176,8 +176,8 @@ def format_message(results):
             f"Fib   : {r['fib']}\n"
             f"High  : {round(r['high'],2)}\n"
             f"Low   : {round(r['low'],2)}\n"
-            f"Score : {round(r['distance'],2)}\n\n"
-        )
+        f"Distance : {r['percent']}%\n"
+f"Potential : {r['upside']}%\n\n"
 
     return text
 
