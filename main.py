@@ -137,8 +137,9 @@ def scan_stock(nepse, stock):
             "low": low
         }
 
-    except Exception:
-        return None
+except Exception as e:
+    print(f"Error scanning {stock['symbol']}: {e}")
+    return None
 
 
 def scan_market(nepse):
