@@ -12,7 +12,13 @@ async def main():
     try:
         nepse = Nepse()
 
-        stocks = nepse.get_stocks()
+         data = dir(nepse)
+
+message = (
+    "📈 NEPSE Scanner Test\n\n"
+    "Available functions:\n"
+    + "\n".join(data)
+)
         stocks = nepse.get_stocks()
 
         message = (
@@ -22,10 +28,6 @@ async def main():
         )
         
 
-        message = (
-            "📈 NEPSE Scanner Test\n\n"
-            "API Connected ✅\n\n"
-            f"First stocks:\n{stocks[:5]}"
         )
 
     except Exception as e:
