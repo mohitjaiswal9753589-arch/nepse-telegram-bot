@@ -140,26 +140,49 @@ def scan_stock(nepse, stock):
                     print(f"Error scanning {stock['symbol']}: {e}")
                     return None
 
+def scan_stock(nepse, stock):
 
-def scan_market(nepse):
+    try:
+        history = nepse.get_historical_chart(stock["id"])
 
-    stocks = nepse.get_security_list()
+        if not history or len(history) < 40:
+            return None
 
-    results = []
+        candles = weekly_candles(history)
 
-    for stock in stocks:
+        if len(candles) < 20:
+            return None
 
-        if not is_common_stock(stock):
-            continue
+        high, low = swing_high_low(candles)
 
-        result = scan_stock(nepse, stock)
+        fibs = fibonacci(high, low)
 
-        if result:
-            results.append(result)
+        price = candles[-1]["close"]
 
-    results.sort(key=lambda x: x["distance"])
+        level, distance = score_stock(price, fibs)
 
-    return results[:5] 
+        if level is None:
+            return None
+
+        tolerance = max(price * 0.015, 2)
+
+        if distance > tolerance:
+            return None
+
+        return {
+            "symbol": stock["symbol"],
+            "price": round(price, 2),
+            "fib": level,
+            "distance": round(distance, 2),
+            "high": high,
+            "low": low
+        }
+
+    except Exception as e:
+        print(f"Error scanning {stock['symbol']}: {e}")
+        return None
+
+    
 
 def format_message(results):
 
