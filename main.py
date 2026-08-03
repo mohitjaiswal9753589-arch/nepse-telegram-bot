@@ -1,4 +1,4 @@
-import os
+   import os
 import asyncio
 from telegram import Bot
 from nepse_data_api import Nepse
@@ -8,26 +8,15 @@ CHAT_ID = os.getenv("CHAT_ID")
 
 
 async def main():
-
     try:
         nepse = Nepse()
 
-         data = dir(nepse)
-
-message = (
-    "📈 NEPSE Scanner Test\n\n"
-    "Available functions:\n"
-    + "\n".join(data)
-)
-        stocks = nepse.get_stocks()
+        data = dir(nepse)
 
         message = (
             "📈 NEPSE Scanner Test\n\n"
-            "API Connected ✅\n\n"
-            f"First stocks:\n{stocks[:5]}"
-        )
-        
-
+            "Available functions:\n\n"
+            + "\n".join(data)
         )
 
     except Exception as e:
