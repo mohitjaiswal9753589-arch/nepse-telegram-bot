@@ -13,6 +13,14 @@ async def main():
         nepse = Nepse()
 
         stocks = nepse.get_stocks()
+        stocks = nepse.get_stocks()
+
+        message = (
+            "📈 NEPSE Scanner Test\n\n"
+            "API Connected ✅\n\n"
+            f"First stocks:\n{stocks[:5]}"
+        )
+        
 
         message = (
             "📈 NEPSE Scanner Test\n\n"
