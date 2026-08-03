@@ -1,31 +1,30 @@
 import os
-import requests
 import asyncio
 from telegram import Bot
+from nepse_data_api import Nepse
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
-API_URL = "https://nepse-data-api.vercel.app/api/history"
 
 async def main():
 
     try:
-        response = requests.get(
-            API_URL,
-            params={"symbol": "NABIL"},
-            timeout=10
-        )
+        nepse = Nepse()
 
-        data = response.text[:500]
+        stocks = nepse.get_stocks()
 
         message = (
-            "📊 NEPSE API Test\n\n"
-            f"{data}"
+            "📈 NEPSE Scanner Test\n\n"
+            "API Connected ✅\n\n"
+            f"First stocks:\n{stocks[:5]}"
         )
 
     except Exception as e:
-        message = f"❌ API Error:\n{e}"
+        message = (
+            "❌ NEPSE API Error\n\n"
+            f"{e}"
+        )
 
     bot = Bot(token=BOT_TOKEN)
 
