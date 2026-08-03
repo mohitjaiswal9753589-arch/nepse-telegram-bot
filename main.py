@@ -177,7 +177,7 @@ def format_message(results):
             f"High  : {round(r['high'],2)}\n"
             f"Low   : {round(r['low'],2)}\n"
         f"Distance : {r['percent']}%\n"
-f"Potential : {r['upside']}%\n\n"
+f"Potential : {r['upside']}%\n\n")
 
     return text
 
