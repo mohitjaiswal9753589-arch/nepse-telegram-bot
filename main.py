@@ -108,6 +108,7 @@ def score_stock(price, fibs):
 def scan_stock(nepse, stock):
     try:
         history = nepse.get_historical_chart(stock["id"])
+        print(stock["symbol"], len(history) if history else 0)
 
         if not history or len(history) < 40:
             return None
