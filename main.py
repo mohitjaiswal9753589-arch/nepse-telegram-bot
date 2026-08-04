@@ -150,6 +150,7 @@ def scan_stock(nepse, stock):
 
 def scan_market(nepse):
     stocks = nepse.get_security_list()
+    print("Total stocks:", len(stocks))
 
     results = []
 
