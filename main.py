@@ -136,14 +136,10 @@ def scan_stock(nepse, stock):
             "high": high,
             "low": low
         }
-        except Exception as e:
-                    print(f"Error scanning {stock['symbol']}: {e}")
-                    return None
-
-def scan_stock(nepse, stock):
+        
 
     try:
-        history = nepse.get_historical_chart(stock["id"])
+        
 
         if not history or len(history) < 40:
             return None
