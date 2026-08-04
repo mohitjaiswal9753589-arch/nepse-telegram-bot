@@ -170,9 +170,9 @@ def scan_market(nepse):
 
 def format_message(results):
     if not results:
-    print("Total setups found:", len(results))
-    print("Results:", results)
-    return "📉 Weekly Scanner\n\nNo setups found."
+        print("Total setups found:", len(results))
+        print("Results:", results)
+        return "📉 Weekly Scanner\n\nNo setups found."
 
     text = "📈 Weekly Fibonacci Scanner\n\n"
 
