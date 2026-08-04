@@ -206,10 +206,9 @@ def format_message(results):
         )
 
     return text
-async def main():
+    async def main():
         print("Bot started")
-
-    bot = Bot(token=BOT_TOKEN)
+        bot = Bot(token=BOT_TOKEN)
 
     try:
 
