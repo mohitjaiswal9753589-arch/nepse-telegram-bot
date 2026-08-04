@@ -156,7 +156,7 @@ def scan_stock(nepse, stock):
             "low": low
         }
 
-    except Exception as e:
+        except Exception as e:
 
         print(f"Error scanning {stock['symbol']}: {e}")
 
@@ -206,11 +206,11 @@ def format_message(results):
         )
 
     return text
-    async def main():
+       
+async def main():
         print("Bot started")
         bot = Bot(token=BOT_TOKEN)
-
-    try:
+     try:
 
         nepse = Nepse()
 
@@ -218,23 +218,22 @@ def format_message(results):
 
         message = format_message(results)
 
-    except Exception as e:
+        except Exception as e:
 
         message = (
             "❌ Scanner Error\n\n"
             + str(e)
         )
+        
+            try:
 
-    try:
-
-        await bot.send_message(
+                await bot.send_message(
             chat_id=CHAT_ID,
             text=message
         )
 
-    except Exception as e:
-
-        print(f"Telegram Error: {e}")
+        except Exception as e:
+               print(f"Telegram Error: {e}")
 
 
 if __name__ == "__main__":
