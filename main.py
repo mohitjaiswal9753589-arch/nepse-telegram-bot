@@ -38,11 +38,9 @@ def is_common_stock(stock):
 
 
 def weekly_candles(data):
-
     weeks = {}
 
     for candle in data:
-
         try:
             date = datetime.strptime(
                 candle["businessDate"],
@@ -57,33 +55,27 @@ def weekly_candles(data):
         )
 
         if key not in weeks:
-
             weeks[key] = {
                 "open": candle["openPrice"],
                 "high": candle["highPrice"],
                 "low": candle["lowPrice"],
                 "close": candle["closePrice"]
             }
-
         else:
-
             weeks[key]["high"] = max(
                 weeks[key]["high"],
                 candle["highPrice"]
             )
-
             weeks[key]["low"] = min(
                 weeks[key]["low"],
                 candle["lowPrice"]
             )
-
             weeks[key]["close"] = candle["closePrice"]
 
     return list(weeks.values())
 
 
 def swing_high_low(candles):
-
     highs = [c["high"] for c in candles]
     lows = [c["low"] for c in candles]
 
@@ -91,7 +83,6 @@ def swing_high_low(candles):
 
 
 def fibonacci(high, low):
-
     diff = high - low
 
     return {
@@ -100,13 +91,12 @@ def fibonacci(high, low):
         0.79: high - diff * 0.79
     }
 
-def score_stock(price, fibs):
 
+def score_stock(price, fibs):
     best_level = None
     best_distance = None
 
     for level, fib_price in fibs.items():
-
         distance = abs(price - fib_price)
 
         if best_distance is None or distance < best_distance:
@@ -115,11 +105,8 @@ def score_stock(price, fibs):
 
     return best_level, best_distance
 
-
-def scan_stock(nepse, stock):
-
+    def scan_stock(nepse, stock):
     try:
-
         history = nepse.get_historical_chart(stock["id"])
 
         if not history or len(history) < 40:
@@ -142,7 +129,6 @@ def scan_stock(nepse, stock):
             return None
 
         percent = (distance / price) * 100
-
         upside = ((high - price) / price) * 100
 
         return {
@@ -156,20 +142,17 @@ def scan_stock(nepse, stock):
             "low": low
         }
 
-        except Exception as e:
-
+    except Exception as e:
         print(f"Error scanning {stock['symbol']}: {e}")
-
         return None
 
-def scan_market(nepse):
 
+def scan_market(nepse):
     stocks = nepse.get_security_list()
 
     results = []
 
     for stock in stocks:
-
         if not is_common_stock(stock):
             continue
 
@@ -185,57 +168,54 @@ def scan_market(nepse):
 
     return results[:5]
 
-
-def format_message(results):
-
+   def format_message(results):
     if not results:
         return "📉 Weekly Scanner\n\nNo setups found."
 
     text = "📈 Weekly Fibonacci Scanner\n\n"
 
     for i, r in enumerate(results, start=1):
-
         text += (
             f"{i}. {r['symbol']}\n"
             f"Price : {r['price']}\n"
             f"Fib : {r['fib']}\n"
-            f"High : {round(r['high'],2)}\n"
-            f"Low : {round(r['low'],2)}\n"
+            f"High : {round(r['high'], 2)}\n"
+            f"Low : {round(r['low'], 2)}\n"
             f"Distance : {r['percent']}%\n"
             f"Potential : {r['upside']}%\n\n"
         )
 
     return text
-       
-async def main():
-        print("Bot started")
-        bot = Bot(token=BOT_TOKEN)
-     try:
 
+
+async def main():
+    print("Bot started")
+
+    bot = Bot(token=BOT_TOKEN)
+
+    try:
         nepse = Nepse()
 
         results = scan_market(nepse)
 
         message = format_message(results)
 
-        except Exception as e:
-
+    except Exception as e:
         message = (
             "❌ Scanner Error\n\n"
             + str(e)
         )
-        
-            try:
 
-                await bot.send_message(
+    try:
+        await bot.send_message(
             chat_id=CHAT_ID,
             text=message
         )
 
-        except Exception as e:
-               print(f"Telegram Error: {e}")
+    except Exception as e:
+        print(f"Telegram Error: {e}")
 
 
 if __name__ == "__main__":
     asyncio.run(main())
-
+    
