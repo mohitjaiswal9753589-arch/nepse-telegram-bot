@@ -107,12 +107,14 @@ def score_stock(price, fibs):
 
 def scan_stock(nepse, stock):
     try:
-    history = nepse.get_historical_chart(stock["id"])
-except Exception as e:
-    print(f"Chart error {stock['symbol']}: {e}")
-    return None
+        try:
+            history = nepse.get_historical_chart(stock["id"])
+        except Exception as e:
+            print(f"Chart error {stock['symbol']}: {e}")
+            return None
 
-print(stock["symbol"], len(history) if history else 0)
+        print(stock["symbol"], len(history) if history else 0)
+        
 
         if not history or len(history) < 40:
             return None
