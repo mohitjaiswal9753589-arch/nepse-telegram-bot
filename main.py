@@ -123,12 +123,9 @@ def scan_stock(nepse, stock):
         if level is None:
             return None
 
-        tolerance = max(price * 0.015, 2)
 
-        if distance > tolerance:
-            return None
 
-        return {
+             return {
             "symbol": stock["symbol"],
             "price": round(price, 2),
             "fib": level,
@@ -138,41 +135,6 @@ def scan_stock(nepse, stock):
         }
         
 
-    try:
-        
-
-        if not history or len(history) < 40:
-            return None
-
-        candles = weekly_candles(history)
-
-        if len(candles) < 20:
-            return None
-
-        high, low = swing_high_low(candles)
-
-        fibs = fibonacci(high, low)
-
-        price = candles[-1]["close"]
-
-        level, distance = score_stock(price, fibs)
-
-        if level is None:
-            return None
-
-        tolerance = max(price * 0.015, 2)
-
-        if distance > tolerance:
-            return None
-
-        return {
-            "symbol": stock["symbol"],
-            "price": round(price, 2),
-            "fib": level,
-            "distance": round(distance, 2),
-            "high": high,
-            "low": low
-        }
 
     except Exception as e:
         print(f"Error scanning {stock['symbol']}: {e}")
