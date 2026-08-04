@@ -1,6 +1,5 @@
 import os
 import asyncio
-import math
 from datetime import datetime
 from telegram import Bot
 from nepse_data_api import Nepse
@@ -39,63 +38,82 @@ def is_common_stock(stock):
 
 
 def weekly_candles(data):
+
     weeks = {}
-    for c in data:
+
+    for candle in data:
+
         try:
-            d = datetime.strptime(c["businessDate"], "%Y-%m-%d")
-        except:
+            date = datetime.strptime(
+                candle["businessDate"],
+                "%Y-%m-%d"
+            )
+        except Exception:
             continue
 
-        key = (d.isocalendar().year, d.isocalendar().week)
+        key = (
+            date.isocalendar().year,
+            date.isocalendar().week
+        )
 
         if key not in weeks:
+
             weeks[key] = {
-                "open": c["openPrice"],
-                "high": c["highPrice"],
-                "low": c["lowPrice"],
-                "close": c["closePrice"]
+                "open": candle["openPrice"],
+                "high": candle["highPrice"],
+                "low": candle["lowPrice"],
+                "close": candle["closePrice"]
             }
+
         else:
+
             weeks[key]["high"] = max(
                 weeks[key]["high"],
-                c["highPrice"]
+                candle["highPrice"]
             )
+
             weeks[key]["low"] = min(
                 weeks[key]["low"],
-                c["lowPrice"]
+                candle["lowPrice"]
             )
-            weeks[key]["close"] = c["closePrice"]
+
+            weeks[key]["close"] = candle["closePrice"]
 
     return list(weeks.values())
 
 
 def swing_high_low(candles):
-    highs = [x["high"] for x in candles]
-    lows = [x["low"] for x in candles]
+
+    highs = [c["high"] for c in candles]
+    lows = [c["low"] for c in candles]
 
     return max(highs), min(lows)
 
 
 def fibonacci(high, low):
+
     diff = high - low
 
     return {
         0.618: high - diff * 0.618,
         0.706: high - diff * 0.706,
         0.79: high - diff * 0.79
-    } 
+    }
+
 def score_stock(price, fibs):
-    best = None
+
     best_level = None
+    best_distance = None
 
-    for level, value in fibs.items():
-        diff = abs(price - value)
+    for level, fib_price in fibs.items():
 
-        if best is None or diff < best:
-            best = diff
+        distance = abs(price - fib_price)
+
+        if best_distance is None or distance < best_distance:
+            best_distance = distance
             best_level = level
 
-    return best_level, best
+    return best_level, best_distance
 
 
 def scan_stock(nepse, stock):
@@ -123,24 +141,50 @@ def scan_stock(nepse, stock):
         if level is None:
             return None
 
+        percent = (distance / price) * 100
 
+        upside = ((high - price) / price) * 100
 
-             return {
+        return {
             "symbol": stock["symbol"],
             "price": round(price, 2),
             "fib": level,
             "distance": round(distance, 2),
+            "percent": round(percent, 2),
+            "upside": round(upside, 2),
             "high": high,
             "low": low
         }
-        
-
 
     except Exception as e:
+
         print(f"Error scanning {stock['symbol']}: {e}")
+
         return None
 
-    
+def scan_market(nepse):
+
+    stocks = nepse.get_security_list()
+
+    results = []
+
+    for stock in stocks:
+
+        if not is_common_stock(stock):
+            continue
+
+        result = scan_stock(nepse, stock)
+
+        if result:
+            results.append(result)
+
+    results.sort(
+        key=lambda x: x["upside"],
+        reverse=True
+    )
+
+    return results[:5]
+
 
 def format_message(results):
 
@@ -154,15 +198,14 @@ def format_message(results):
         text += (
             f"{i}. {r['symbol']}\n"
             f"Price : {r['price']}\n"
-            f"Fib   : {r['fib']}\n"
-            f"High  : {round(r['high'],2)}\n"
-            f"Low   : {round(r['low'],2)}\n"
-        f"Distance : {r['percent']}%\n"
-f"Potential : {r['upside']}%\n\n")
+            f"Fib : {r['fib']}\n"
+            f"High : {round(r['high'],2)}\n"
+            f"Low : {round(r['low'],2)}\n"
+            f"Distance : {r['percent']}%\n"
+            f"Potential : {r['upside']}%\n\n"
+        )
 
     return text
-
-
 async def main():
 
     bot = Bot(token=BOT_TOKEN)
@@ -191,7 +234,7 @@ async def main():
 
     except Exception as e:
 
-        print(e)
+        print(f"Telegram Error: {e}")
 
 
 if __name__ == "__main__":
