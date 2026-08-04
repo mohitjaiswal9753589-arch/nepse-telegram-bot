@@ -105,7 +105,7 @@ def score_stock(price, fibs):
 
     return best_level, best_distance
 
-    def scan_stock(nepse, stock):
+def scan_stock(nepse, stock):
     try:
         history = nepse.get_historical_chart(stock["id"])
 
@@ -168,7 +168,7 @@ def scan_market(nepse):
 
     return results[:5]
 
-   def format_message(results):
+def format_message(results):
     if not results:
         return "📉 Weekly Scanner\n\nNo setups found."
 
@@ -218,4 +218,5 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+    
     
