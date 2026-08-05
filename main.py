@@ -1,8 +1,7 @@
 import os
 import asyncio
-from datetime import datetime
 from telegram import Bot
-from nepse_data_api import Nepse
+from scanner import scan_market
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
@@ -204,7 +203,6 @@ async def main():
     bot = Bot(token=BOT_TOKEN)
 
     try:
-        nepse = Nepse()
 
         results = scan_market(nepse)
 
