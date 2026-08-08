@@ -153,23 +153,15 @@ def scan_stock(stock):
 
 def scan_market():
     stocks = get_stocks()
-    print("Total stocks:", len(stocks))
 
-    results = []
-
-    for stock in stocks:
-        if not is_common_stock(stock):
-            continue
-
-        result = scan_stock(stock)
-
-        if result:
-            results.append(result)
-
-    results.sort(
-        key=lambda x: x["upside"],
-        reverse=True
+    test_stock = next(
+        (s for s in stocks if s.get("symbol") == "EBL"),
+        None
     )
 
-    return results[:5]
-  
+    if test_stock:
+        print("TESTING:", test_stock["symbol"], test_stock["id"])
+        print("TEST HISTORY:", get_history(test_stock["id"]))
+
+    return []
+    
