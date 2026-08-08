@@ -5,7 +5,7 @@ nepse = Nepse()
 
 
 def get_stocks():
-    return nepse.get_security_list()
+    return nepse.get_stocks()
 
 
 def get_history(stock_id):
