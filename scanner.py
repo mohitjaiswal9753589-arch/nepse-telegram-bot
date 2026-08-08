@@ -9,11 +9,21 @@ START_DATE = "2025-01-01"
 def get_stocks():
     return nepse.get_security_list()
 def get_history(stock_id):
-    return nepse.get_historical_chart(
-        stock_id,
-        start_date=START_DATE,
-        end_date=today
-    )
+    try:
+        history = nepse.get_historical_chart(
+            stock_id,
+            start_date=START_DATE,
+            end_date=today
+        )
+
+        print("HISTORY", stock_id, len(history) if history else 0)
+
+        return history
+
+    except Exception as e:
+        print("HISTORY ERROR", stock_id, e)
+        return []
+        
 def is_common_stock(stock):
     symbol = stock.get("symbol", "")
     name = stock.get("securityName", "").upper()
