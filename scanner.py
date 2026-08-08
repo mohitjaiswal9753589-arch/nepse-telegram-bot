@@ -11,10 +11,17 @@ def get_stocks():
 def get_history(stock_id):
     try:
         history = nepse.get_historical_chart(
-            stock_id,
-            start_date=START_DATE,
-            end_date=today
+            stock_id
         )
+
+        print("HISTORY", stock_id, len(history) if history else 0)
+
+        return history
+
+    except Exception as e:
+        print("HISTORY ERROR", stock_id, e)
+        return []
+        
 
         print("HISTORY", stock_id, len(history) if history else 0)
 
