@@ -37,7 +37,8 @@ async def main():
 
     try:
 
-        results = scan_market()
+        results = scan_market(nepse)
+        
 
         message = format_message(results)
 
