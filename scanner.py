@@ -2,6 +2,20 @@ from datetime import date, datetime
 from nepse_data_api import Nepse
 
 nepse = Nepse()
+print("API TEST START")
+
+try:
+    test = nepse.get_historical_chart(
+        137,
+        start_date="2026-01-01",
+        end_date="2026-08-08"
+    )
+    print("API TEST RESULT:", test[:2] if test else test)
+except Exception as e:
+    print("API TEST ERROR:", e)
+
+print("API TEST END")
+
 
 today = date.today().strftime("%Y-%m-%d")
 START_DATE = "2025-01-01"
