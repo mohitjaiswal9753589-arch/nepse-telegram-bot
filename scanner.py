@@ -1,50 +1,30 @@
-from datetime import date, datetime
+from datetime import datetime
 from nepse_data_api import Nepse
 
 nepse = Nepse()
-print("API TEST START")
 
-try:
-    test = nepse.get_historical_chart(
-        137,
-        start_date="2026-01-01",
-        end_date="2026-08-08"
-    )
-    print("API TEST RESULT:", test[:2] if test else test)
-except Exception as e:
-    print("API TEST ERROR:", e)
-
-print("API TEST END")
-
-
-today = date.today().strftime("%Y-%m-%d")
-START_DATE = "2025-01-01"
 
 def get_stocks():
     return nepse.get_security_list()
+
+
 def get_history(stock_id):
     try:
-        history = nepse.get_historical_chart(
-            stock_id
+        history = nepse.get_historical_chart(stock_id)
+
+        print(
+            "HISTORY",
+            stock_id,
+            len(history) if history else 0
         )
 
-        print("HISTORY", stock_id, len(history) if history else 0)
-
-        return history
+        return history or []
 
     except Exception as e:
         print("HISTORY ERROR", stock_id, e)
         return []
-        
 
-        print("HISTORY", stock_id, len(history) if history else 0)
 
-        return history
-
-    except Exception as e:
-        print("HISTORY ERROR", stock_id, e)
-        return []
-        
 def is_common_stock(stock):
     symbol = stock.get("symbol", "")
     name = stock.get("securityName", "").upper()
@@ -67,6 +47,7 @@ def is_common_stock(stock):
 
     return not any(word in name for word in banned)
 
+
 def weekly_candles(data):
     weeks = {}
 
@@ -76,39 +57,60 @@ def weekly_candles(data):
                 candle["businessDate"],
                 "%Y-%m-%d"
             )
-        except Exception:
-            continue
 
-        key = (
-            d.isocalendar().year,
-            d.isocalendar().week
-        )
+            key = (
+                d.isocalendar().year,
+                d.isocalendar().week
+            )
+
+            open_price = float(candle["openPrice"])
+            high = float(candle["highPrice"])
+            low = float(candle["lowPrice"])
+            close = float(candle["closePrice"])
+
+        except (KeyError, TypeError, ValueError):
+            continue
 
         if key not in weeks:
             weeks[key] = {
-                "open": candle["openPrice"],
-                "high": candle["highPrice"],
-                "low": candle["lowPrice"],
-                "close": candle["closePrice"]
+                "open": open_price,
+                "high": high,
+                "low": low,
+                "close": close
             }
+
         else:
             weeks[key]["high"] = max(
                 weeks[key]["high"],
-                candle["highPrice"]
+                high
             )
+
             weeks[key]["low"] = min(
                 weeks[key]["low"],
-                candle["lowPrice"]
+                low
             )
-            weeks[key]["close"] = candle["closePrice"]
 
-    return list(weeks.values())
+            weeks[key]["close"] = close
+
+    return [
+        weeks[key]
+        for key in sorted(weeks)
+    ]
+
 
 def swing_high_low(candles):
-    highs = [c["high"] for c in candles]
-    lows = [c["low"] for c in candles]
+    highs = [
+        c["high"]
+        for c in candles
+    ]
+
+    lows = [
+        c["low"]
+        for c in candles
+    ]
 
     return max(highs), min(lows)
+
 
 def fibonacci(high, low):
     diff = high - low
@@ -116,46 +118,93 @@ def fibonacci(high, low):
     return {
         0.618: high - diff * 0.618,
         0.706: high - diff * 0.706,
-        0.79: high - diff * 0.79
+        0.790: high - diff * 0.790
     }
 
+
 def score_stock(price, fibs):
+
     best_level = None
     best_distance = None
 
     for level, value in fibs.items():
-        distance = abs(price - value)
 
-        if best_distance is None or distance < best_distance:
-            best_distance = distance
+        distance = abs(
+            price - value
+        )
+
+        if (
+            best_distance is None
+            or distance < best_distance
+        ):
             best_level = level
+            best_distance = distance
 
     return best_level, best_distance
 
-def scan_stock(stock):
-    try:
-        history = get_history(stock["id"])
 
-        if not history or len(history) < 40:
+def scan_stock(stock):
+
+    try:
+
+        history = get_history(
+            stock["id"]
+        )
+
+        if len(history) < 40:
             return None
 
-        candles = weekly_candles(history)
+        candles = weekly_candles(
+            history
+        )
 
         if len(candles) < 20:
             return None
 
-        high, low = swing_high_low(candles)
-        fibs = fibonacci(high, low)
+        high, low = swing_high_low(
+            candles
+        )
+
+        if high <= low:
+            return None
+
+        fibs = fibonacci(
+            high,
+            low
+        )
 
         price = candles[-1]["close"]
 
-        level, distance = score_stock(price, fibs)
+        if price <= 0:
+            return None
+
+        level, distance = score_stock(
+            price,
+            fibs
+        )
 
         if level is None:
             return None
 
-        percent = (distance / price) * 100
-        upside = ((high - price) / price) * 100
+        percent = (
+            distance / price
+        ) * 100
+
+        upside = (
+            (high - price)
+            / price
+        ) * 100
+
+        # Maximum distance from Fibonacci level:
+        # 1.5% of price or Rs. 2, whichever is greater.
+
+        tolerance = max(
+            price * 0.015,
+            2
+        )
+
+        if distance > tolerance:
+            return None
 
         return {
             "symbol": stock["symbol"],
@@ -164,25 +213,53 @@ def scan_stock(stock):
             "distance": round(distance, 2),
             "percent": round(percent, 2),
             "upside": round(upside, 2),
-            "high": high,
-            "low": low
+            "high": round(high, 2),
+            "low": round(low, 2)
         }
 
     except Exception as e:
-        print(f"Error scanning {stock['symbol']}: {e}")
+
+        print(
+            f"Error scanning "
+            f"{stock.get('symbol', 'UNKNOWN')}: {e}"
+        )
+
         return None
 
+
 def scan_market():
+
     stocks = get_stocks()
 
-    test_stock = next(
-        (s for s in stocks if s.get("symbol") == "EBL"),
-        None
+    results = []
+
+    print(
+        "Total stocks:",
+        len(stocks)
     )
 
-    if test_stock:
-        print("TESTING:", test_stock["symbol"], test_stock["id"])
-        print("TEST HISTORY:", get_history(test_stock["id"]))
+    for stock in stocks:
 
-    return []
-    
+        if not is_common_stock(stock):
+            continue
+
+        result = scan_stock(
+            stock
+        )
+
+        if result:
+            results.append(
+                result
+            )
+
+    results.sort(
+        key=lambda x: x["upside"],
+        reverse=True
+    )
+
+    print(
+        "Total setups found:",
+        len(results)
+    )
+
+    return results
